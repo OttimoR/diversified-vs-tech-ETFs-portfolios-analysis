@@ -5,9 +5,7 @@ import seaborn as sns
 import yfinance as yf
 import os
 
-def get_data(tickers):
-    start_date = '2014-01-01'
-    end_date = '2024-12-31'
+def get_data(tickers, start_date, end_date):
     data = 'etfs_data_clean.csv'
     #Check if data exists already, if not download and clean:
     if os.path.exists('etfs_data_clean.csv'):
@@ -49,3 +47,10 @@ def quarterly_rebalancing(returns_df, div_tickers, target_weights, initial_capit
     div_equity = values_df.sum(axis=1)
     div_returns = div_equity.pct_change().fillna(0).astype(float) #this is so taht pandas knows in the future the data type, cause it will turn off automatic recognition for .fillna function
     return div_equity, div_returns
+
+def downside_deviation(window, MAR):
+    excess_returns = window - MAR
+    downside_returns = excess_returns[excess_returns < 0]
+    if downside_returns.empty:
+        return 0
+    return downside_returns.std()
