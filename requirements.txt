@@ -5,3 +5,5 @@ matplotlib
 seaborn
 scipy
 pyportfolioopt
+pandas-datareader
+os
