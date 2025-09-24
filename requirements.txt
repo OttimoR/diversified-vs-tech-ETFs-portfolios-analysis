@@ -7,3 +7,5 @@ scipy
 pyportfolioopt
 pandas-datareader
 os
+datetime
+statsmodels

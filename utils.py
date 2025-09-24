@@ -29,7 +29,7 @@ def get_data(tickers, start_date, end_date):
         print('Data saved to etfs_data_clean.csv')
     return prices_df
 
-def quarterly_rebalancing(returns_df, div_tickers, target_weights, initial_capital):
+def quarterly_rebalancing(returns_df, div_tickers, target_weights, initial_capital, commission = 0, slippage = 0.001):
     quarterly_dates = returns_df.resample('QE').last().index #ending dates of each quarter
     values_df = pd.DataFrame(index = returns_df.index, columns = div_tickers) #storing each ETF value over time separetely to adjust weights later
     values_df.iloc[0] = initial_capital * target_weights
@@ -40,10 +40,14 @@ def quarterly_rebalancing(returns_df, div_tickers, target_weights, initial_capit
 
         #rebalance on quarter-end:
         if current_date in quarterly_dates:
-            total_value = values_df.iloc[i].sum()
-            values_df.iloc[i] = total_value * target_weights
-
-    #total portfolio value is the sum of all holdings each day
+            total_value_before = values_df.iloc[i].sum()
+            target_values = total_value_before * target_weights
+            trade_values = np.abs(values_df.iloc[i] - target_values)
+            total_cost = (slippage * trade_values.sum()) + (commission * len(div_tickers))
+            total_value_after_cost = total_value_before - total_cost
+            values_df.iloc[i] = total_value_after_cost * target_weights
+            
+    #total portfolio value is the sum of all holdings each day:
     div_equity = values_df.sum(axis=1)
     div_returns = div_equity.pct_change().fillna(0).astype(float) #this is so taht pandas knows in the future the data type, cause it will turn off automatic recognition for .fillna function
     return div_equity, div_returns
