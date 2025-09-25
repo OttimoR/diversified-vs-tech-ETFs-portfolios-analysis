@@ -49,7 +49,9 @@ def quarterly_rebalancing(returns_df, div_tickers, target_weights, initial_capit
             
     #total portfolio value is the sum of all holdings each day:
     div_equity = values_df.sum(axis=1)
-    div_returns = div_equity.pct_change().fillna(0).astype(float) #this is so taht pandas knows in the future the data type, cause it will turn off automatic recognition for .fillna function
+    with pd.option_context('future.no_silent_downcasting', True):
+        div_returns = div_equity.pct_change().infer_objects().fillna(0)
+    #section above to avoid future warning from pandas
     return div_equity, div_returns
 
 def downside_deviation(window, MAR):
